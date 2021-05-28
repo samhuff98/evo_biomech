@@ -71,7 +71,7 @@ while True:
         speed = base_speed +((195 - x_value) * diff)
     else:
         speed = 0
-    #
+
     ticcmd('--energize')
     ticcmd('--exit-safe-start', '--velocity', str(speed))
 
