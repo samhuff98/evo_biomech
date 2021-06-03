@@ -29,15 +29,39 @@ while True:
     speed = 0
 
     ret, frame = cap.read()
-    crop_frame = frame[TA[2]:TA[3], TA[0]:TA[1]]
-    hsv = cv2.cvtColor(crop_frame, cv2.COLOR_BGR2HSV)
-    output = cv2.rectangle(frame, (TA[0], TA[2]), (TA[1], TA[3]), (255, 0, 0), 2)
+    grayscaled = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    retval, threshold = cv2.threshold(grayscaled, 120, 255, cv2.THRESH_BINARY)
 
-    lower_red = np.array([30, 30, 130])
-    upper_red = np.array([105, 255, 255])
+    res = cv2.bitwise_and(frame, frame, mask=threshold)
 
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    res = cv2.bitwise_and(crop_frame, crop_frame, mask=mask)
+    lower_insect = np.array([100, 100, 100])
+    upper_insect = np.array([200, 200, 200])
+    hsv1 = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    mask1 = cv2.inRange(hsv1, lower_insect, upper_insect)
+
+    mask = np.zeros(frame.shape, dtype=np.uint8)
+    roi_corners = np.array([[(0, 0), (10, 300), (600, 300), (300,10)]], dtype=np.int32)
+    # fill the ROI so it doesn't get wiped out when the mask is applied
+    channel_count = frame.shape[2]  # i.e. 3 or 4 depending on your image
+    ignore_mask_color = (255,) * channel_count
+    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+    masked_image = cv2.bitwise_and(frame, mask)
+
+
+    #mask1 = cv2.inrange(hsv, lower_base, upper_base)
+    #retval, threshold = cv2.threshold(grayscaled, 120, 255, cv2.THRESH_BINARY)
+    #cropped = cv2.bitwise_and(frame, frame, mask=mask1)
+    #crop_frame = frame[TA[2]:TA[3], TA[0]:TA[1]]
+    #hsv = cv2.cvtColor(crop_frame, cv2.COLOR_BGR2HSV)
+    #output = cv2.rectangle(frame, (TA[0], TA[2]), (TA[1], TA[3]), (255, 0, 0), 2)
+
+    #lower_red = np.array([30, 30, 130])
+    #upper_red = np.array([105, 255, 255])
+
+    #mask = cv2.inRange(hsv, lower_red, upper_red)
+    #res = cv2.bitwise_and(crop_frame, crop_frame, mask=mask)
+
+
     #invert = cv2.bitwise_not(crop_frame)
     #gray = cv2.cvtColor(invert, cv2.COLOR_BGR2GRAY)
     #blur = cv2.medianBlur(gray, 25)
@@ -47,7 +71,7 @@ while True:
     #erosion = cv2.erode(mask, kernel, iterations=1)
     #dilation = cv2.dilate(erosion, kernel, iterations = 1)
 
-    cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cv2.findContours(mask1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
@@ -75,11 +99,11 @@ while True:
     ticcmd('--energize')
     ticcmd('--exit-safe-start', '--velocity', str(speed))
 
-    #cv2.imshow('frame', frame)
-    cv2.imshow('output', output)
-    cv2.imshow('mask', mask)
-    #cv2.imshow('res', res)
-    #cv2.imshow('erosion', erosion)
+    cv2.imshow('frame', frame)
+    cv2.imshow('res', res)
+    cv2.imshow('mask', mask1)
+    cv2.imshow('threshold', threshold)
+    cv2.imshow('crop', masked_image)
     #cv2.imshow('dilation', dilation)
     #cv2.imshow('blur', blur)
 
