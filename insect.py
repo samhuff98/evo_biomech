@@ -97,7 +97,7 @@ while True:
             break
 
     if 0 < x_value < 200:
-        speed = base_speed +((300-x_value) * diff)
+        speed = base_speed +((200-x_value) * diff)
 
     elif 200<= x_value < 450:
         speed = base_speed
