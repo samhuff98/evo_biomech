@@ -41,7 +41,7 @@ while True:
 
     mask1 = np.ones(frame.shape, dtype=np.uint8)
     mask1.fill(255)
-    roi_corners = np.array([[(100, -40), (100, 480), (610, 330), (610,150)]], dtype=np.int32)
+    roi_corners = np.array([[(0, -10), (0, 480), (620, 350), (620,140)]], dtype=np.int32)
     cv2.fillPoly(mask1, roi_corners, 0)
     cut_frame = cv2.bitwise_or(frame, mask1)
 
@@ -80,7 +80,7 @@ while True:
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
-    minimum_area = 1000
+    minimum_area = 500
     for c in cnts:
 
         area = cv2.contourArea(c)
@@ -96,10 +96,10 @@ while True:
             cv2.putText(frame, 'Y value: {}'.format(y), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
             break
 
-    if 100 < x_value < 300:
+    if 0 < x_value < 200:
         speed = base_speed +((300-x_value) * diff)
 
-    elif 300<= x_value < 550:
+    elif 200<= x_value < 450:
         speed = base_speed
     else:
         speed = 0
