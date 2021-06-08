@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import subprocess
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cap.set(28, 20)
 
 # - Initialization -------------------------------------------
@@ -80,7 +80,7 @@ while True:
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
-    minimum_area = 500
+    minimum_area = 300
     for c in cnts:
 
         area = cv2.contourArea(c)
@@ -96,10 +96,10 @@ while True:
             cv2.putText(frame, 'Y value: {}'.format(y), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
             break
 
-    if 0 < x_value < 200:
-        speed = base_speed +((200-x_value) * diff)
+    if 0 < x_value < 300:
+        speed = base_speed +((300-x_value) * diff)
 
-    elif 200<= x_value < 450:
+    elif 300<= x_value < 550:
         speed = base_speed
     else:
         speed = 0
