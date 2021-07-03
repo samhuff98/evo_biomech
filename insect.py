@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 import subprocess
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(-1)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,480)
 cap.set(28, 20)
 
 # - Initialization -------------------------------------------
