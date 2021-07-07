@@ -44,40 +44,40 @@ for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port
 
     mask = np.ones(frame.shape, dtype=np.uint8)
     mask.fill(255)
-    roi_corners = np.array([[(0, -10), (0, 480), (620, 350), (620,140)]], dtype=np.int32)
+    corners = [(20, 10), (35, 455), (612, 312), (615,135)]
+    roi_corners = np.array([corners], dtype=np.int32)
     cv2.fillPoly(mask, roi_corners, 0)
     cut_frame = cv2.bitwise_or(frame, mask)
 
+    cv2.line(frame, corners[0], corners[1], (136,55,212), 1)
+    cv2.line(frame, corners[1], corners[2], (136,55,212), 1)
+    cv2.line(frame, corners[2], corners[3], (136,55,212), 1)
+    cv2.line(frame, corners[3], corners[0], (136,55,212), 1)
+
     grayscaled = cv2.cvtColor(cut_frame, cv2.COLOR_BGR2GRAY)
-    retval, threshold = cv2.threshold(grayscaled, 80, 255, cv2.THRESH_BINARY_INV)
+    retval, threshold = cv2.threshold(grayscaled, 50, 255, cv2.THRESH_BINARY_INV)
 
     cnts = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
-    minimum_area = 50
+    minimum_area = 300
     maximum_area = 1000
     for c in cnts:
 
         area = cv2.contourArea(c)
-        if maximum_area > area > minimum_area:
+        if  area > minimum_area:
             # Find centroid
             M = cv2.moments(c)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            cv2.circle(frame, (cX, cY), 20, (36, 255, 12), 2)
+            cv2.circle(frame, (cX, cY), 10, (36, 255, 12), 2)
             x, y, w, h = cv2.boundingRect(c)
             x_value = x
             cv2.putText(frame, 'X value: {}'.format(x), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
             cv2.putText(frame, 'Y value: {}'.format(y), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
             break
 
-    # Display the frame using OpenCV
-    cv2.imshow("Frame", frame)
-    #cv2.imshow("Cut Frame", cut_frame)
-    #cv2.imshow("Threshold", threshold)
-    # Clear the stream in preparation for the next frame
-    raw_capture.truncate(0)
 
     if 0 < x_value < 300:
         speed = base_speed +((300-x_value) * diff)
@@ -86,10 +86,21 @@ for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port
         speed = base_speed
     else:
         speed = 0
+        x_value = 0
 
     ticcmd('--energize')
     ticcmd('--exit-safe-start', '--velocity', str(speed))
+    cv2.putText(frame, 'Belt Speed: {} mm/s'.format(speed/42500), (400, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (96, 55, 212), 2)
 
+    # Display the frame using OpenCV
+    cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.resizeWindow("Frame", 10, 10)
+    cv2.imshow("Frame", frame)
+    #cv2.imshow("Cut Frame", cut_frame)
+    #cv2.imshow("Threshold", threshold)
+    # Clear the stream in preparation for the next frame
+    raw_capture.truncate(0)
 
 
     # If the `q` key was pressed, break from the loop

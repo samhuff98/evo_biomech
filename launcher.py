@@ -6,6 +6,7 @@ import signal
 def ticcmd(*args):
     return subprocess.check_output(['ticcmd'] + list(args))
 
+x_value = 0
 GPIO.cleanup()
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
@@ -22,8 +23,8 @@ try:
         if GPIO.input(GPIO_switch)==False:
             rpistr = "python /home/pi/Documents/evo_biomech/cam_test.py"
             p=subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
-            time.sleep(2)
             GPIO.output(GPIO_LED_red, False)
+            time.sleep(2)
             GPIO.output(GPIO_LED_green, True)
             runs+=1
             while GPIO.input(GPIO_switch)==False:
