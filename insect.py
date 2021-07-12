@@ -74,12 +74,12 @@ while True:
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
 
-    minimum_area = 50
+    minimum_area = 500
     maximum_area = 1000
     for c in cnts:
 
         area = cv2.contourArea(c)
-        if maximum_area > area > minimum_area:
+        if area > minimum_area:
             # Find centroid
             M = cv2.moments(c)
             cX = int(M["m10"] / M["m00"])
