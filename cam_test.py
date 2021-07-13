@@ -1,4 +1,5 @@
 # import the necessary packages
+from __future__ import print_function
 import argparse
 from picamera.array import PiRGBArray # Generates a 3D RGB array
 from picamera import PiCamera # Provides a Python interface for the RPi Camera Module
@@ -6,84 +7,62 @@ import time # Provides time-related functions
 import cv2 # OpenCV library
 import numpy as np
 import subprocess
-from evo_biomech import PyVideoStream
+import imutils
+from imutils.video import FPS
+from imutils.video.pivideostream import PiVideoStream
 
 def ticcmd(*args):
     return subprocess.check_output(['ticcmd'] + list(args))
 
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-n", "--num-frames", type=int, default=100,help="# of frames to loop over for FPS test")
-ap.add_argument("-d", "--display", type=int, default=-1,help="Whether or not frames should be displayed")
-args = vars(ap.parse_args())
 # initialize the camera and stream
 camera = PiCamera()
 camera.resolution = (320, 240)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(320, 240))
 stream = camera.capture_continuous(rawCapture, format="bgr",use_video_port=True)
-
 # created a *threaded *video stream, allow the camera sensor to warmup,
 # and start the FPS counter
-print("[INFO] sampling THREADED frames from `picamera` module...")
+camera.close()
 vs = PiVideoStream().start()
 time.sleep(2.0)
-fps = FPS().start()
+
+base_speed = 5000000
+diff = 20000
+
 # loop over some frames...this time using the threaded stream
-while fps._numFrames < args["num_frames"]:
+while True:
 	# grab the frame from the threaded video stream and resize it
 	# to have a maximum width of 400 pixels
 	frame = vs.read()
 	frame = imutils.resize(frame, width=400)
 	# check to see if the frame should be displayed to our screen
-	if args["display"] > 0:
-		cv2.imshow("Frame", frame)
-		key = cv2.waitKey(1) & 0xFF
+	cv2.imshow("Frame", frame)
+	key = cv2.waitKey(1) & 0xFF
+    if cv2.waitKey(1) && 0xFF == ord('c'):
+        break
 	# update the FPS counter
-	fps.update()
-# stop the timer and display FPS information
-fps.stop()
-print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
-print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vs.stop()
 
-ticcmd('--reset')
-ticcmd('--step-mode', str(int(4)))
-ticcmd('--max-accel', str(int(1500000)))
-ticcmd('--max-decel', str(int(1500000)))
-ticcmd('--max-speed', str(int(18000000)))
-ticcmd('--current', str(int(320)))
+#ticcmd('--reset')
+#ticcmd('--step-mode', str(int(4)))
+#ticcmd('--max-accel', str(int(1500000)))
+#ticcmd('--max-decel', str(int(1500000)))
+#ticcmd('--max-speed', str(int(18000000)))
+#ticcmd('--current', str(int(320)))
 
-base_speed = 5000000
-diff = 20000
 
-# Initialize the camera
-camera = PiCamera()
-
-camera.start_preview()
-
-# Set the camera resolution
-camera.resolution = (640, 480)
-
-# Set the number of frames per second
-camera.framerate = 32
-
-# Generates a 3D RGB array and stores it in rawCapture
-raw_capture = PiRGBArray(camera, size=(640, 480))
-
-# Wait a certain number of seconds to allow the camera time to warmup
-time.sleep(0.1)
 
 # Capture frames continuously from the camera
-for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
+#for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
 
-    x_value = 0
-    speed = 0
+#    x_value = 0
+#    speed = 0
 
     # Grab the raw NumPy array representing the image
-    image = frame.array
+#    image = frame.array
 
     #mask = np.ones(frame.shape, dtype=np.uint8)
     #mask.fill(255)
@@ -139,17 +118,15 @@ for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port
     #cv2.namedWindow("Frame", cv2.WND_PROP_FULLSCREEN)
     #cv2.setWindowProperty("Frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     #cv2.resizeWindow("Frame", 10, 10)
-    cv2.imshow("Frame", image)
+#    cv2.imshow("Frame", image)
     #cv2.imshow("Cut Frame", cut_frame)
     #cv2.imshow("Threshold", threshold)
     # Clear the stream in preparation for the next frame
-    raw_capture.truncate(0)
+#    raw_capture.truncate(0)
 
 
-    # If the `q` key was pressed, break from the loop
-    if cv2.waitKey(1) & 0xFF == ord('c'):
-        break
 
-ticcmd('--enter-safe-start')
-ticcmd('--deenergize')
-cv2.destroyAllWindows()
+
+#ticcmd('--enter-safe-start')
+#ticcmd('--deenergize')
+#cv2.destroyAllWindows()

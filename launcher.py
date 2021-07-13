@@ -3,6 +3,7 @@ from gpiozero import Button
 import time
 import subprocess, os
 import signal
+
 def ticcmd(*args):
     return subprocess.check_output(['ticcmd'] + list(args))
 
@@ -21,7 +22,7 @@ try:
     runs = 0
     while True:
         if GPIO.input(GPIO_switch)==False:
-            rpistr = "python /home/pi/Documents/evo_biomech/cam_test.py"
+            rpistr = "python /home/pi/Documents/evo_biomech/treadmill.py"
             p=subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
             GPIO.output(GPIO_LED_red, False)
             time.sleep(2)
