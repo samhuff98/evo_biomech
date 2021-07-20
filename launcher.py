@@ -25,7 +25,10 @@ try:
             rpistr = "python /home/pi/Documents/evo_biomech/treadmill.py"
             p=subprocess.Popen(rpistr, shell=True, preexec_fn=os.setsid)
             GPIO.output(GPIO_LED_red, False)
-            time.sleep(2)
+            GPIO.output(GPIO_LED_green, True)
+            time.sleep(0.5)
+            GPIO.output(GPIO_LED_green, False)
+            time.sleep(3.5)
             GPIO.output(GPIO_LED_green, True)
             runs+=1
             while GPIO.input(GPIO_switch)==False:
