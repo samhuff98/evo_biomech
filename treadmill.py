@@ -58,10 +58,12 @@ while True:
     frame = vs.read()
     ndarray = np.full((900,1440,3), 20, dtype=np.uint8)
     grayscaled = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    kernel = np.ones((2,2), np.uint8)
 
-    if runs == 0 or GPIO.input(GPIO_calibrate)==False:
+    if runs < 20 or GPIO.input(GPIO_calibrate)==False:
         GPIO.output(GPIO_LED_blue, True)
-        ret1, mask1 = cv2.threshold(grayscaled, 100, 255, cv2.THRESH_BINARY_INV)
+        ret1, mask1 = cv2.threshold(grayscaled, 120, 255, cv2.THRESH_BINARY_INV)
+        #mask1 = cv2.morphologyEx(mask1, cv2.MORPH_CLOSE, kernel)
         runs+=1
     else:
         GPIO.output(GPIO_LED_blue, False)
@@ -69,6 +71,7 @@ while True:
     cut_frame = cv2.bitwise_or(grayscaled, mask1)
     ret2, mask2 = cv2.threshold(cut_frame, 100 ,255, cv2.THRESH_BINARY)
     mask2 = cv2.bitwise_not(mask2)
+    mask2 = cv2.erode(mask2, kernel, iterations=1)
     mask1_disp = cv2.merge([mask1,mask1,mask1])
     mask2_disp = cv2.merge([mask2,mask2,mask2])
 
@@ -77,7 +80,7 @@ while True:
         cnts = cv2.findContours(mask2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
-        minimum_area = 100
+        minimum_area = 10
         for c in cnts:
             area = cv2.contourArea(c)
             if area > minimum_area:
@@ -91,9 +94,9 @@ while True:
                 cv2.putText(ndarray, 'Y value: {}'.format(y), (50,855), cv2.FONT_HERSHEY_SIMPLEX, 1, (136, 255, 12), 2)
                 break
 
-        if 0 < x_value < 300:
+        if 0 < x_value < 150:
             speed = tic_base_speed +((300-x_value) * tic_diff)
-        elif 300 <= x_value < 550:
+        elif 150 <= x_value < 265:
             speed = tic_base_speed
         else:
             speed = 0
