@@ -69,6 +69,7 @@ while True:
     #creating blank array for interface
     ndarray = np.full((900,1440,3), 20, dtype=np.uint8)
     grayscaled = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
     kernel = np.ones((5,5), np.uint8)
     #masking out the background
     if runs < 20 or GPIO.input(GPIO_calibrate)==False:
@@ -83,6 +84,7 @@ while True:
     cut_frame = cv2.bitwise_or(grayscaled, mask1)
     ret2, mask2 = cv2.threshold(cut_frame, 100 ,255, cv2.THRESH_BINARY)
     mask2 = cv2.bitwise_not(mask2)
+
     #mask2 = cv2.dilate(mask2, kernel, iterations=1)
     mask1_disp = cv2.merge([mask1,mask1,mask1])
     mask2_disp = cv2.merge([mask2,mask2,mask2])
@@ -110,10 +112,12 @@ while True:
                 cv2.putText(ndarray, 'X value: {}'.format(x), (50,805), cv2.FONT_HERSHEY_SIMPLEX, 1, (136, 255, 12), 2)
                 cv2.putText(ndarray, 'Y value: {}'.format(y), (50,855), cv2.FONT_HERSHEY_SIMPLEX, 1, (136, 255, 12), 2)
                 break
+
     #tracking mode speed setting
         if 0 < x_value < 150:
             speed = tic_base_speed +((150-x_value) * tic_diff)
         elif 150 <= x_value < 280:
+
             speed = tic_base_speed
         else:
             speed = 0
